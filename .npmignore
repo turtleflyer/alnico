@@ -2,6 +2,7 @@
 /*/
 !/dist/
 !/src/
+!/doc/
 !/tsconfig*.*
 /tsconfig.eslint.json
 !/jest.config.js
