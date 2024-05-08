@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { gse } from '../alnico';
-import type { BuildDeps, GSEBundle, LazilySignature } from '../alnico.types';
+import type { BuildDeps, LazilyWithDeps } from '../alnico.types';
 import { compose, lazily } from '../index';
 import type { IsEqual, IsTrue } from './__assets__/test.types';
 
@@ -128,18 +128,43 @@ describe('test lazy scenarios', () => {
               IsEqual<
                 typeof param,
                 {
-                  v: GSEBundle<
-                    number,
-                    BuildDeps<
-                      { v: number },
-                      {
-                        getVMultipliedWithSum: () => number;
-                        setV: (n: number) => void;
-                        multipleOn100: (n: number) => number;
-                      },
-                      { multipleOn10: (n: number) => number; x: number }
-                    >
-                  >;
+                  v: {
+                    get: () => number;
+
+                    set: (
+                      newValue:
+                        | number
+                        | LazilyWithDeps<
+                            number,
+                            BuildDeps<
+                              { v: number },
+                              {
+                                getVMultipliedWithSum: () => number;
+                                setV: (n: number) => void;
+                                multipleOn100: (n: number) => number;
+                              },
+                              { multipleOn10: (n: number) => number; x: number }
+                            >
+                          >
+                    ) => void;
+
+                    exc: (
+                      newValue:
+                        | number
+                        | LazilyWithDeps<
+                            number,
+                            BuildDeps<
+                              { v: number },
+                              {
+                                getVMultipliedWithSum: () => number;
+                                setV: (n: number) => void;
+                                multipleOn100: (n: number) => number;
+                              },
+                              { multipleOn10: (n: number) => number; x: number }
+                            >
+                          >
+                    ) => number;
+                  };
 
                   getVMultipliedWithSum: () => number;
                   setV: (n: number) => void;
@@ -431,7 +456,7 @@ describe('test lazy scenarios', () => {
 
     const { passToA, readA } = compose<
       { a: number },
-      { passToA: (newV: number | LazilySignature<number, any>) => void; readA: () => number }
+      { passToA: (newV: number | LazilyWithDeps<number, any>) => void; readA: () => number }
     >(
       { a: 3 },
 
@@ -535,10 +560,35 @@ describe('test lazy scenarios', () => {
                 IsEqual<
                   typeof param,
                   {
-                    v: GSEBundle<
-                      number,
-                      BuildDeps<{ v: number }, { m1: () => number; m2: (x: number) => number }, {}>
-                    >;
+                    v: {
+                      get: () => number;
+
+                      set: (
+                        newValue:
+                          | number
+                          | LazilyWithDeps<
+                              number,
+                              BuildDeps<
+                                { v: number },
+                                { m1: () => number; m2: (x: number) => number },
+                                {}
+                              >
+                            >
+                      ) => void;
+
+                      exc: (
+                        newValue:
+                          | number
+                          | LazilyWithDeps<
+                              number,
+                              BuildDeps<
+                                { v: number },
+                                { m1: () => number; m2: (x: number) => number },
+                                {}
+                              >
+                            >
+                      ) => number;
+                    };
 
                     m1: () => number;
                     m2: (x: number) => number;
@@ -812,5 +862,37 @@ describe('test lazy scenarios', () => {
     expect(beenRan1).toBe(false);
     expect(beenRan2).toBe(false);
     expect(beenRan3).toBe(true);
+  });
+
+  test('exc method with lazy value works correctly', () => {
+    let beenRan = false;
+    let captureV = 1000;
+
+    const { meth } = compose<{ a: number }, { meth: (x: number) => void }>(
+      {
+        a: lazily(({ a }) => {
+          beenRan = true;
+          captureV = a.get();
+
+          return 11;
+        }),
+      },
+
+      {
+        meth: ({ a }, x) => {
+          return a.exc(x);
+        },
+      }
+    );
+
+    expect(meth(35)).toBe(11);
+    expect(beenRan).toBe(true);
+    expect(captureV).toBe(35);
+
+    beenRan = false;
+    captureV = 2000;
+    expect(meth(56)).toBe(35);
+    expect(beenRan).toBe(false);
+    expect(captureV).toBe(2000);
   });
 });

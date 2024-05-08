@@ -1,13 +1,13 @@
 import { COMP_LAZILY_SIGNATURE } from './alnico.const';
-import type { Compose, GSEBundle, LazilyFn, LazilySignature } from './alnico.types';
+import type { Compose, LazilyFn, LazilyWithDeps } from './alnico.types';
 
 export const gse = <T, Deps extends Record<string, unknown>>(
-  initState: T | LazilySignature<T, Deps>,
+  initState: T | LazilyWithDeps<T, Deps>,
   deps: Deps
-): GSEBundle<T, Deps> => {
+) => {
   let holdValue = initState;
 
-  const retrieveValue = (v: T | LazilySignature<T, Deps>) =>
+  const retrieveValue = (v: T | LazilyWithDeps<T, Deps>) =>
     isLazily<T, Deps>(v) ? v[COMP_LAZILY_SIGNATURE](deps) : v;
 
   return {
@@ -17,11 +17,11 @@ export const gse = <T, Deps extends Record<string, unknown>>(
       return holdValue;
     },
 
-    set: (newValue) => {
+    set: (newValue: T | LazilyWithDeps<T, Deps>) => {
       holdValue = newValue;
     },
 
-    exc: (newValue) => {
+    exc: (newValue: T | LazilyWithDeps<T, Deps>) => {
       const snapshotValue = holdValue;
       holdValue = newValue;
 
@@ -34,7 +34,7 @@ export const compose: Compose = (
   initState: Record<string, unknown>,
   composers: Record<string, (deps: Record<string, unknown>, ...args: unknown[]) => unknown>,
   embed?: Record<string, unknown> &
-    (LazilySignature<Record<string, unknown>, Record<string, unknown>> | {})
+    (LazilyWithDeps<Record<string, unknown>, Record<string, unknown>> | {})
 ) => {
   const deps = Object.create(null) as Record<string, unknown>;
   const composedBundle = Object.create(null) as Record<string, unknown>;
@@ -87,14 +87,14 @@ export const compose: Compose = (
 
 export const lazily = <T, Deps extends Record<string, unknown> = {}>(
   lazilyFn: LazilyFn<T, Deps>
-): LazilySignature<T, Deps> => ({
+): LazilyWithDeps<T, Deps> => ({
   [COMP_LAZILY_SIGNATURE]: lazilyFn,
 });
 
 const isLazily = <
   T,
   Deps extends Record<string, unknown>,
-  L extends LazilySignature<T, Deps> = LazilySignature<T, Deps>,
+  L extends LazilyWithDeps<T, Deps> = LazilyWithDeps<T, Deps>,
 >(
   validate: T | L
 ): validate is L =>

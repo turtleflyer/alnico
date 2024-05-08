@@ -1,141 +1,238 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { gse } from '../alnico';
-import type { BuildDeps, GSEBundle } from '../alnico.types';
-import Comp, { compose, lazily, type MethodComposer } from '../index';
+import type { GSEBundle, LazilyWithDeps } from '../alnico.types';
+import Comp, { compose, lazily, type BuildDeps, type MethodComposer } from '../index';
 import type { IsEqual, IsTrue } from './__assets__/test.types';
 
 describe('test types, identity and minimum functionality', () => {
-  test('primitive types are correct', () => {
+  test('defined types are correct', () => {
+    type D01 = BuildDeps<{ a: number; b: string }, { foo: () => number }>;
+    type D02 = BuildDeps<{ a: number; b: string }, { foo: () => number }, {}>;
+    type M01 = MethodComposer<{ a: number; b: () => string }, (p: string) => number>;
+    type M02 = MethodComposer<{ a: number; b: () => string }, (p: string) => number, 'foo'>;
+
+    type Test1 = [
+      IsTrue<
+        IsEqual<
+          D01,
+          {
+            a: {
+              get: () => number;
+
+              set: (
+                newValue:
+                  | number
+                  | LazilyWithDeps<
+                      number,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => void;
+
+              exc: (
+                newValue:
+                  | number
+                  | LazilyWithDeps<
+                      number,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => number;
+            };
+
+            b: {
+              get: () => string;
+
+              set: (
+                newValue:
+                  | string
+                  | LazilyWithDeps<
+                      string,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => void;
+
+              exc: (
+                newValue:
+                  | string
+                  | LazilyWithDeps<
+                      string,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => string;
+            };
+
+            foo: () => number;
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          D02,
+          {
+            a: {
+              get: () => number;
+
+              set: (
+                newValue:
+                  | number
+                  | LazilyWithDeps<
+                      number,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => void;
+
+              exc: (
+                newValue:
+                  | number
+                  | LazilyWithDeps<
+                      number,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => number;
+            };
+
+            b: {
+              get: () => string;
+              set: (
+                newValue:
+                  | string
+                  | LazilyWithDeps<
+                      string,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => void;
+
+              exc: (
+                newValue:
+                  | string
+                  | LazilyWithDeps<
+                      string,
+                      BuildDeps<{ a: number; b: string }, { foo: () => number }>
+                    >
+              ) => string;
+            };
+
+            foo: () => number;
+          }
+        >
+      >,
+
+      IsTrue<IsEqual<M01, (deps: { a: number; b: () => string }, p: string) => number>>,
+
+      IsTrue<
+        IsEqual<
+          M02,
+          (deps: { a: number; b: () => string; foo: (p: string) => number }, p: string) => number
+        >
+      >,
+    ];
+  });
+
+  test('primitive types works with implementation', () => {
     const gs1: GSEBundle<number, {}> = gse(1, {});
 
     // @ts-expect-error
     const gs2: GSEBundle<string> = gse(1);
 
-    const composer1: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
+    const composer01: MethodComposer<
+      BuildDeps<{ a: number; b: string }, { foo: () => number }>,
+      (p: string) => boolean,
+      'bar'
     > = ({ a, b, foo, bar }, p) => true;
 
-    const composer2: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
-    > = ({ a, b }, p) => true;
+    const composer02: MethodComposer<
+      BuildDeps<{ a: number; b: string }, { foo: () => number }>,
+      (p: string) => boolean
+    > = ({ a, b, foo }, p) => true;
 
-    const composer3: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
-    > = () => true;
-
-    // @ts-expect-error
-    const composer4: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
+    const composer03: MethodComposer<
+      BuildDeps<{ a: number; b: string }, { foo: () => number }>,
+      (p: string) => boolean
       // @ts-expect-error
-    > = (_, p1, p2) => true;
+    > = ({ a, b, foo, bar }, p) => true;
 
-    const composer5: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
-      // @ts-expect-error
-    > = (_, p) => 1;
-
-    const composer6: MethodComposer<
-      'foo',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
+    const composer04: MethodComposer<
+      {
+        a: number;
+        b: () => string;
+      },
+      () => number
     > = () => 1;
 
+    const composer05: MethodComposer<
+      {
+        a: number;
+        b: () => string;
+      },
+      () => number
+    > = ({ a, b }) => 1;
+
+    const composer06: MethodComposer<
+      {
+        a: number;
+        b: () => string;
+      },
+      () => number
+    > = ({
+      a,
+      b,
+      // @ts-expect-error
+      c,
+    }) => 1;
+
+    const composer07: MethodComposer<
+      { a: number; b: () => string },
+      () => number
+      // @ts-expect-error
+    > = () => 'a';
+
     // @ts-expect-error
-    const composer7: MethodComposer<
-      'foo',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean }
+    const composer08: MethodComposer<
+      { a: number; b: () => string },
+      () => number
       // @ts-expect-error
     > = (_, p) => 1;
 
-    const composer8: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
-    > = ({ a, b, foo, bar, c, m }, p) => true;
-
-    const composer9: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
-    > = ({ a, b, c, m }, p) => true;
+    const composer09: MethodComposer<
+      {
+        a: number;
+        b: () => string;
+      },
+      (p: string) => boolean
+    > = (_, p) => true;
 
     const composer10: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
-    > = () => true;
+      { a: number; b: () => string },
+      (p: string) => boolean
+      // @ts-expect-error
+    > = (_, p) => 1;
 
     // @ts-expect-error
     const composer11: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
+      { a: number; b: () => string },
+      (p: string) => boolean
       // @ts-expect-error
     > = (_, p1, p2) => true;
 
-    const composer12: MethodComposer<
-      'bar',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
-      // @ts-expect-error
-    > = (_, p) => 1;
-
-    const composer13: MethodComposer<
-      'foo',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
-    > = () => 1;
-
-    // @ts-expect-error
-    const composer14: MethodComposer<
-      'foo',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
-      // @ts-expect-error
-    > = (_, p) => 1;
-
     const symbolK = Symbol();
 
-    const composer15: MethodComposer<
-      'foo',
+    const composer12: MethodComposer<
       // @ts-expect-error
-      { [symbolK]: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
+      { [symbolK]: number; b: () => number },
+      () => number
     > = (_) => 1;
 
-    const composer16: MethodComposer<
-      typeof symbolK,
-      { a: number; b: string },
+    const composer13: MethodComposer<
+      { b: () => number },
+      () => number,
       // @ts-expect-error
-      { [symbolK]: () => number; bar: (p: string) => boolean },
-      { c: number; m: (p: boolean) => string }
+      typeof symbolK
     > = (_) => 1;
 
-    const composer17: MethodComposer<
-      'foo',
-      { a: number; b: string },
-      { foo: () => number; bar: (p: string) => boolean },
+    const composer14: MethodComposer<
       // @ts-expect-error
-      { [symbolK]: number; m: (p: boolean) => string }
+      BuildDeps<{ a: number; b: string }, { [symbolK]: () => string }>,
+      () => number
     > = (_) => 1;
   });
 
@@ -232,70 +329,163 @@ describe('test types, identity and minimum functionality', () => {
     );
 
     type TestCase1 = [
-      IsTrue<IsEqual<typeof gs11, GSEBundle<number, {}>>>,
-      IsTrue<IsEqual<typeof gs12, GSEBundle<number, { foo: number }>>>,
-      IsTrue<IsEqual<typeof gs21, GSEBundle<string[], {}>>>,
-      IsTrue<IsEqual<typeof gs22, GSEBundle<string[], { foo: number }>>>,
-      IsTrue<IsEqual<typeof gs31, GSEBundle<readonly ['a'], {}>>>,
-      IsTrue<IsEqual<typeof gs32, GSEBundle<readonly ['a'], { foo: number }>>>,
-      IsTrue<IsEqual<typeof gs41, GSEBundle<string | string[], {}>>>,
-      IsTrue<IsEqual<typeof gs42, GSEBundle<string | string[], { foo: number }>>>,
+      IsTrue<
+        IsEqual<
+          typeof gs11,
+          {
+            get: () => number;
+            set: (newValue: number | LazilyWithDeps<number, {}>) => void;
+            exc: (newValue: number | LazilyWithDeps<number, {}>) => number;
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs12,
+          {
+            get: () => number;
+            set: (newValue: number | LazilyWithDeps<number, { foo: number }>) => void;
+            exc: (newValue: number | LazilyWithDeps<number, { foo: number }>) => number;
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs21,
+          {
+            get: () => string[];
+            set: (newValue: string[] | LazilyWithDeps<string[], {}>) => void;
+            exc: (newValue: string[] | LazilyWithDeps<string[], {}>) => string[];
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs22,
+          {
+            get: () => string[];
+            set: (newValue: string[] | LazilyWithDeps<string[], { foo: number }>) => void;
+            exc: (newValue: string[] | LazilyWithDeps<string[], { foo: number }>) => string[];
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs31,
+          {
+            get: () => readonly ['a'];
+            set: (newValue: readonly ['a'] | LazilyWithDeps<readonly ['a'], {}>) => void;
+            exc: (newValue: readonly ['a'] | LazilyWithDeps<readonly ['a'], {}>) => readonly ['a'];
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs32,
+          {
+            get: () => readonly ['a'];
+
+            set: (
+              newValue: readonly ['a'] | LazilyWithDeps<readonly ['a'], { foo: number }>
+            ) => void;
+
+            exc: (
+              newValue: readonly ['a'] | LazilyWithDeps<readonly ['a'], { foo: number }>
+            ) => readonly ['a'];
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs41,
+          {
+            get: () => string | string[];
+            set: (newValue: string | string[] | LazilyWithDeps<string | string[], {}>) => void;
+            exc: (
+              newValue: string | string[] | LazilyWithDeps<string | string[], {}>
+            ) => string | string[];
+          }
+        >
+      >,
+
+      IsTrue<
+        IsEqual<
+          typeof gs42,
+          {
+            get: () => string | string[];
+
+            set: (
+              newValue: string | string[] | LazilyWithDeps<string | string[], { foo: number }>
+            ) => void;
+
+            exc: (
+              newValue: string | string[] | LazilyWithDeps<string | string[], { foo: number }>
+            ) => string | string[];
+          }
+        >
+      >,
 
       IsTrue<
         IsEqual<
           typeof comp1,
-          Readonly<{ meth1: () => void; meth2: (x: string) => void; meth3: () => number }>
+          { meth1: () => void; meth2: (x: string) => void; meth3: () => number }
         >
       >,
 
       IsTrue<
         IsEqual<
           typeof comp2,
-          Readonly<{
+          {
             meth1: () => null;
             meth2: (x: string) => void;
             meth3: (x: number) => string;
             c1: () => null;
             c2: (x: number) => string;
             c3: string[];
-          }>
+          }
         >
       >,
 
       IsTrue<
         IsEqual<
           typeof comp3,
-          Readonly<{
+          {
             meth1: () => void;
             meth2: (x: string) => void;
             meth3: (x: string | string[]) => number | number[] | string;
-          }>
+          }
         >
       >,
 
       IsTrue<
         IsEqual<
           typeof comp4,
-          Readonly<{
+          {
             meth1: () => void;
             meth2: (x: string) => void;
             meth3: (x: string | string[]) => number | number[] | string;
             c: number | number[];
-          }>
+          }
         >
       >,
 
       IsTrue<
         IsEqual<
           typeof comp5,
-          Readonly<{
+          {
             meth1: () => void;
             meth2: (x: string) => void;
             meth3: (x: number) => number | number[] | string;
             c1: () => void;
             c2: (x: number) => string;
             c3: string[];
-          }>
+          }
         >
       >,
     ];
@@ -315,24 +505,62 @@ describe('test types, identity and minimum functionality', () => {
             IsTrue<
               IsEqual<
                 typeof a,
-                GSEBundle<
-                  number,
-                  {
-                    a: GSEBundle<
-                      number,
-                      BuildDeps<
-                        { a: number },
-                        { meth1: () => void; meth2: (x: string) => void; meth3: () => number },
-                        { b: string }
-                      >
-                    >;
+                {
+                  get: () => number;
 
-                    meth1: () => void;
-                    meth2: (x: string) => void;
-                    meth3: () => number;
-                    b: string;
-                  }
-                >
+                  set: (
+                    newValue:
+                      | number
+                      | LazilyWithDeps<
+                          number,
+                          {
+                            a: GSEBundle<
+                              number,
+                              BuildDeps<
+                                { a: number },
+                                {
+                                  meth1: () => void;
+                                  meth2: (x: string) => void;
+                                  meth3: () => number;
+                                },
+                                { b: string }
+                              >
+                            >;
+                            meth1: () => void;
+                            meth2: (x: string) => void;
+                            meth3: () => number;
+                            b: string;
+                          }
+                        >
+                  ) => void;
+
+                  exc: (
+                    newValue:
+                      | number
+                      | LazilyWithDeps<
+                          number,
+                          {
+                            a: GSEBundle<
+                              number,
+                              BuildDeps<
+                                { a: number },
+                                {
+                                  meth1: () => void;
+                                  meth2: (x: string) => void;
+                                  meth3: () => number;
+                                },
+                                { b: string }
+                              >
+                            >;
+
+                            meth1: () => void;
+                            meth2: (x: string) => void;
+                            meth3: () => number;
+                            b: string;
+                          }
+                        >
+                  ) => number;
+                }
               >
             >,
 
@@ -363,6 +591,10 @@ describe('test types, identity and minimum functionality', () => {
     a.set(2);
 
     expect(a.get()).toBe(2);
+
+    expect(a.exc(4)).toBe(2);
+
+    expect(a.get()).toBe(4);
 
     () => {
       // @ts-expect-error

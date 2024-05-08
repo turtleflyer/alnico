@@ -1,2 +1,2 @@
 export { compose, default, lazily } from './alnico';
-export type { Compose, MethodComposer } from './alnico.types';
+export type { BuildDeps, Compose, MethodComposer } from './alnico.types';

@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { compose } from '../index';
+import alnico, { compose, lazily } from '../index';
 
 describe('test restrictions and advanced edge cases', () => {
+  test('default import is identical as method imported separately', () => {
+    const { compose: composeFromDefImport, lazily: lazilyFromDefImport } = alnico;
+
+    expect(compose).toBe(composeFromDefImport);
+    expect(lazily).toBe(lazilyFromDefImport);
+  });
+
   test('symbols in init part are not allowed', () => {
     const symbolK = Symbol();
 

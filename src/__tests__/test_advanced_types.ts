@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { compose } from '../index';
-import { IsEqual, IsTrue } from './__assets__/test.types';
+import type { IsEqual, IsTrue } from './__assets__/test.types';
 
 describe('test advanced types and edge cases with types', () => {
   test('generic types passed to composer work correctly', () => {

@@ -1,16 +1,20 @@
-import type { Compose, GSEBundle, LazilyFn, LazilySignature } from './alnico.types';
+import type { Compose, LazilyFn, LazilyWithDeps } from './alnico.types';
 export declare const gse: <T, Deps extends Record<string, unknown>>(
-  initState: T | LazilySignature<T, Deps>,
+  initState: T | LazilyWithDeps<T, Deps>,
   deps: Deps
-) => GSEBundle<T, Deps>;
+) => {
+  get: () => T;
+  set: (newValue: T | LazilyWithDeps<T, Deps>) => void;
+  exc: (newValue: T | LazilyWithDeps<T, Deps>) => T;
+};
 export declare const compose: Compose;
 export declare const lazily: <T, Deps extends Record<string, unknown> = {}>(
   lazilyFn: LazilyFn<T, Deps>
-) => LazilySignature<T, Deps>;
+) => LazilyWithDeps<T, Deps>;
 declare const Comp: {
   compose: Compose;
   lazily: <T, Deps extends Record<string, unknown> = {}>(
     lazilyFn: LazilyFn<T, Deps>
-  ) => LazilySignature<T, Deps>;
+  ) => LazilyWithDeps<T, Deps>;
 };
 export default Comp;
