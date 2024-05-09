@@ -1,12 +1,12 @@
-# Alnico:magnet:
+# Alnico
 
 ![Alnico](./doc/media/alnico.jpg)
 
-_Alnico:magnet:_ is a TypeScript library under development that investigates the potential benefits
-of combining functional programming principles with the modularity strengths of object-oriented
-programming. Inspired by concepts from functional programming, _Alnico:magnet:_ seeks to introduce a
-novel approach to code structure and organization. It achieves this by eliminating the use of `this`
-and `new` keywords in favor of composable states and methods bundled into single units.
+_Alnico_ is a TypeScript library under development that investigates the potential benefits of
+combining functional programming principles with the modularity strengths of object-oriented
+programming. Inspired by concepts from functional programming, _Alnico_ seeks to introduce a novel
+approach to code structure and organization. It achieves this by eliminating the use of `this` and
+`new` keywords in favor of composable states and methods bundled into single units.
 
 ## Installation
 
@@ -16,8 +16,8 @@ npm i alnico
 
 ## Use
 
-This section explores the usage of _Alnico:magnet:_ through a practical example. The example
-implements a counter using _Alnico:magnet:_'s composition functionality:
+This section explores the usage of _Alnico_ through a practical example. The example implements a
+counter using _Alnico_'s composition functionality:
 
 ```ts
 import { compose } from 'alnico';
@@ -59,25 +59,23 @@ curCount();    //0;
 
 ```
 
-To illustrate _Alnico:magnet:_'s composition approach, this example constructs a set of interrelated
-methods using the compose function. These methods function independently, eliminating the need for a
-central managing object. This is achieved by removing the `this` keyword and explicitly passing all
-internal dependencies through the composer functions' parameters. This fosters a programming style
-with clear and unambiguous dependency management. Additionally, TypeScript's IntelliSense
-functionality enhances development by automatically suggesting parameters for each function.
+To illustrate _Alnico_'s composition approach, this example constructs a set of interrelated methods
+using the compose function. These methods function independently, eliminating the need for a central
+managing object. This is achieved by removing the `this` keyword and explicitly passing all internal
+dependencies through the composer functions' parameters. This fosters a programming style with clear
+and unambiguous dependency management. Additionally, TypeScript's IntelliSense functionality
+enhances development by automatically suggesting parameters for each function.
 
 ![IntelliSense (snippet)](doc/media/snippet1-ts-is.jpg)
 
-It's important to note that _Alnico:magnet:_'s effectiveness is heavily dependent on TypeScript. The
-proposed _Alnico:magnet:_ composition approach wouldn't be as efficient with plain JavaScript. While
-it would still function, managing parameter requirements for composer functions and allowed
-parameters for dependency methods would become increasingly difficult, especially in complex use
-cases.
+It's important to note that _Alnico_'s effectiveness is heavily dependent on TypeScript. The
+proposed _Alnico_ composition approach wouldn't be as efficient with plain JavaScript. While it
+would still function, managing parameter requirements for composer functions and allowed parameters
+for dependency methods would become increasingly difficult, especially in complex use cases.
 
-## Alnico:magnet: Composition Breakdown
+## Alnico Composition Breakdown
 
-_Alnico:magnet:_ compositions consist of three parts, with one being optional. Let's examine them in
-detail:
+_Alnico_ compositions consist of three parts, with one being optional. Let's examine them in detail:
 
 ![Alnico parts (snippet)](doc/media/snippet2-parts.jpg)
 
@@ -86,11 +84,11 @@ detail:
    variable behaves like a method bundle with three functions: `get`, `set`, and `exc`. We'll
    explore these functions in more detail later.
 
-2. **Methods composition:** This is the core component of _Alnico:magnet:_. It's responsible for
-   producing the final methods as a result of the composition process. The source for these methods
-   comes from the composers passed as the second argument. The key difference between composers and
-   the methods they create is that composers have an extra parameter placed first, before the rest
-   of the arguments accepted by the methods. This extra argument is the bundle that contains the
+2. **Methods composition:** This is the core component of _Alnico_. It's responsible for producing
+   the final methods as a result of the composition process. The source for these methods comes from
+   the composers passed as the second argument. The key difference between composers and the methods
+   they create is that composers have an extra parameter placed first, before the rest of the
+   arguments accepted by the methods. This extra argument is the bundle that contains the
    dependencies as named properties.
 
    ![Dependencies
@@ -115,24 +113,24 @@ and parameters (snippet)](doc/media/snippet3-deps.jpg)
 3. **Embedded (Optional):** This optional part allows you to define constants that you want to make
    accessible as dependencies to compose methods. It's similar to the concept of dependency
    injection in object-oriented programming. Embedded dependencies are also included in the output
-   generated by _Alnico:magnet:_.
+   generated by _Alnico_.
 
 > **Naming Inspiration:**
 >
-> The name _Alnico:magnet:_ is inspired by an iron alloy that combines three additional elements:
-> aluminum (_Al_), nickel (_Ni_), and cobalt (_Co_). This combination results in a powerful
-> permanent magnet with exceptional resistance to demagnetization.
+> The name _Alnico_ is inspired by an iron alloy that combines three additional elements: aluminum
+> (_Al_), nickel (_Ni_), and cobalt (_Co_). This combination results in a powerful permanent magnet
+> with exceptional resistance to demagnetization.
 
 ## State
 
-Continuing from the previous discussion, each state variable in _Alnico:magnet:_ is a wrapper around
-three methods: `get`, `set`, and `exc`. As expected, `get()` retrieves the current value,
-`set(newValue)` updates the value with a new one, and `exc(newValue)` performs a combination of
-reading the old value and writing the new one.
+Continuing from the previous discussion, each state variable in _Alnico_ is a wrapper around three
+methods: `get`, `set`, and `exc`. As expected, `get()` retrieves the current value, `set(newValue)`
+updates the value with a new one, and `exc(newValue)` performs a combination of reading the old
+value and writing the new one.
 
 ## Lazily
 
-_Alnico:magnet:_ offers a secondary utility function called `lazily`:
+_Alnico_ offers a secondary utility function called `lazily`:
 
 ```ts
 import { lazily }  from 'alnico';
@@ -278,22 +276,3 @@ minOf3(60, 55, 80);           // 50
 minOf5(120, 60, 70, 80, 65);  // 50
 minOf5(120, 80, 75, 54, 33);  // 33
 ```
-
-<style>
-  img[alt="Alnico"] {
-    width: clamp(30%, 200px, 100%);
-    display: block;
-    margin: auto;
-  }
-
-  img[alt*="(snippet)"] {
-    width: min(500px, 100%);
-    display: block;
-    margin: 2rem 0
-  }
-
-  blockquote {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-  }
-</style>
