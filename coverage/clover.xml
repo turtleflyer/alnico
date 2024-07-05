@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1715143682821" clover="3.2.0">
-  <project timestamp="1715143682821" name="All files">
+<coverage generated="1720144920772" clover="3.2.0">
+  <project timestamp="1720144920772" name="All files">
     <metrics statements="108" coveredstatements="108" conditionals="26" coveredconditionals="26" methods="13" coveredmethods="13" elements="147" coveredelements="147" complexity="0" loc="108" ncloc="108" packages="1" files="3" classes="3"/>
     <file name="alnico.const.ts" path="C:\@turtlefly\Code\alnico\src\alnico.const.ts">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
